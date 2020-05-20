@@ -8198,14 +8198,20 @@ void Cmd_Ammerc_f(gentity_t *ent) {
 		return;
 	}
 
-	 // If logged in
-	if (ent->client->pers.userName && ent->client->pers.userName[0]) {
-		trap->SendServerCommand(-1, va("print \"%s ^7(%s) is now a mercenary\n\"", ent->client->pers.netname, ent->client->pers.userName)); // Let everyone know
+	if (g_allowMercenary.integer == 1) {
+		trap->SendServerCommand(-1, va("print \"%s is now a mercenary\n\"", ent->client->pers.netname)); // Let everyone know
 	}
-	else
+	else if (g_allowMercenary.integer >= 2) 
 	{
-		trap->SendServerCommand(ent - g_entities, "print \"You are not logged in!\n\"");
-		return;
+		// If logged in
+		if (ent->client->pers.userName && ent->client->pers.userName[0]) {
+			trap->SendServerCommand(-1, va("print \"%s ^7(%s) is now a mercenary\n\"", ent->client->pers.netname, ent->client->pers.userName)); // Let everyone know
+		}
+		else
+		{
+			trap->SendServerCommand(ent - g_entities, "print \"You are not logged in!\n\"");
+			return;
+		}
 	}
 
 	if (ent->client->pers.mercMode)
