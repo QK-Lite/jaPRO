@@ -5695,6 +5695,9 @@ void Cmd_Aminfo_f(gentity_t *ent)
 		if (ent->client->pers.mercMode)
 		{
 			Q_strcat(buf, sizeof(buf), "mercFlame ");
+#if 0
+			Q_strcat(buf, sizeof(buf), "mercCortosis ");
+#endif
 			/*
 			Q_strcat(buf, sizeof(buf), "amWeapons ");
 			Q_strcat(buf, sizeof(buf), "amItems ");
@@ -8344,6 +8347,29 @@ void Cmd_MercFlame_f(gentity_t *ent){
 	}
 }
 
+#if 0
+void Cmd_MercCortosis_f(gentity_t *ent) {
+	if (!g_allowMercenary.integer) {
+		trap->SendServerCommand( ent-g_entities, "print \"^5This command is not allowed!\n\"" );
+		return;
+	}
+
+	if (!ent->client)
+		return;
+
+	if (!ent->client->pers.mercMode)
+		return;
+
+	if (trap->Argc() != 1) {
+		trap->SendServerCommand( ent-g_entities, "print \"Usage: /mercCortosis\n\"" );
+		return;
+	}
+
+	ent->client->pers.mercCortosis = qtrue;
+	trap->SendServerCommand( ent-g_entities, "print \"^5Cortosis mode activated!\n\"" );
+}
+#endif
+
 /*
 =================
 ClientCommand
@@ -8531,6 +8557,9 @@ command_t commands[] = {
 	{ "masterList",			Cmd_ListMasters_f,			CMD_NOINTERMISSION },
 
 	{ "mercFlame",			Cmd_MercFlame_f,			CMD_NOINTERMISSION|CMD_ALIVE },
+#if 0
+	{ "mercCortosis",		Cmd_MercCortosis_f,			CMD_NOINTERMISSION|CMD_ALIVE },
+#endif
 
 	{ "modversion",			Cmd_ModVersion_f,			0 },
 	{ "move",				Cmd_MovementStyle_f,		CMD_NOINTERMISSION},

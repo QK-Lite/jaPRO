@@ -4683,6 +4683,21 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_
 		return;
 	}
 
+#if 0 // not tested
+	if (targ->client) //are we sure targ != NULL?
+	{
+		if (g_gametype.integer == GT_FFA && attacker && attacker != targ) {
+			if (targ->client->pers.mercCortosis && !targ->client->ps.m_iVehicleNum && attacker->client && !attacker->NPC) {
+				if (mod == MOD_SABER && !attacker->client->ps.saberInFlight && !Q_irand(0, 2))
+				{
+					attacker->client->ps.saberHolstered = 2;
+					attacker->client->ps.weaponTime += 500;
+				}
+			}
+		}
+	}
+#endif
+
 	if (attacker && attacker->client && attacker->client->noclip)//Japro fix noclip abuse
 		return;
 

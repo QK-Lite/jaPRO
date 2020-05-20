@@ -859,6 +859,9 @@ typedef struct clientPersistant_s {
 	qboolean	noDuelTele;
 	qboolean	amfreeze;//JAPRO - Serverside - Admin - Amfreeze admin cmd
 	qboolean	mercMode; //QK-Lite - Mercernary mode
+#if 0
+	qboolean	mercCortosis; //QK-Lite - Mercernary mode
+#endif
 	vec3_t		telemarkOrigin;//JAPRO - Serverside - Admin - Telemark storage
 	float		telemarkAngle;//JAPRO - Serverside - Admin - Telemark storage
 	float		telemarkPitchAngle;//JAPRO - Serverside - Admin - Telemark storage
