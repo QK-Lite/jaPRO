@@ -8224,6 +8224,120 @@ void Cmd_Ammerc_f(gentity_t *ent) {
 	}
 }
 
+// Lugormod function
+void UpdateClientRenderBolts(gentity_t *self, vec3_t renderOrigin, vec3_t renderAngles);
+void Cmd_MercFlame_f(gentity_t *ent){
+	vec3_t forward;
+	vec3_t center, mins, maxs, dir, ent_org, size, v;
+	trace_t tr;
+	gentity_t *traceEnt;
+	float radius, dot, dist;
+	//gentity_t *entityList[MAX_GENTITIES];
+	int iEntityList[MAX_GENTITIES];
+	int e, numListedEntities, i;
+
+	if(ent->client->sess.sessionTeam == TEAM_SPECTATOR)
+		return;
+
+	if(!ent->client->pers.mercMode)
+		return;
+
+	if(ent->client->ps.m_iVehicleNum > 0 && ent->client->ps.m_iVehicleNum < ENTITYNUM_NONE)
+		return;
+
+	//Dont do this if we are busy
+	if(ent->client->ps.forceHandExtend != HANDEXTEND_NONE || ent->client->ps.weaponTime > 0)
+		return;
+
+	if(ent->client->ps.jetpackFuel < 25)
+		return;
+	ent->client->ps.jetpackFuel -= 25;
+	ent->client->ps.eFlags &= ~EF_INVULNERABLE;
+	ent->client->invulnerableTimer = 0;
+
+	AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
+	VectorNormalize( forward );
+
+	VectorCopy( ent->client->ps.origin, center );
+	//Ufo: we will have a longer radius only if we're being gripped
+	if (ent->client->ps.fd.forceGripBeingGripped > level.time)
+		radius = 175;
+	else
+		radius = 125;
+	for( i = 0 ; i < 3 ; i++ ){
+		mins[i] = center[i] - radius;
+		maxs[i] = center[i] + radius;
+	}
+
+	UpdateClientRenderBolts(ent, ent->client->ps.origin, ent->client->ps.viewangles);
+	
+	G_PlayEffectID(G_EffectIndex("env/flame_jet"), ent->client->renderInfo.handRPoint, ent->client->ps.viewangles);
+	ent->client->ps.forceHandExtend = HANDEXTEND_FORCEPUSH;
+	ent->client->ps.forceHandExtendTime = level.time + 1000;
+
+	numListedEntities = trap->EntitiesInBox(mins, maxs, iEntityList, MAX_GENTITIES);
+
+
+	for ( e = 0 ; e < numListedEntities ; e++ ){
+		traceEnt = &g_entities[iEntityList[e]];
+
+		if(traceEnt == ent || !traceEnt->inuse || !traceEnt->takedamage || traceEnt->health <= 0 )//no torturing corpses
+			continue;
+		if ( !g_friendlyFire.integer && OnSameTeam(ent, traceEnt))
+			continue;
+		// find the distance from the edge of the bounding box
+		for( i = 0 ; i < 3 ; i++ ){
+			if(center[i] < traceEnt->r.absmin[i])
+				v[i] = traceEnt->r.absmin[i] - center[i];
+			else if(center[i] > traceEnt->r.absmax[i])
+				v[i] = center[i] - traceEnt->r.absmax[i];
+			else
+				v[i] = 0;
+		}
+
+		VectorSubtract( traceEnt->r.absmax, traceEnt->r.absmin, size );
+		VectorMA( traceEnt->r.absmin, 0.5, size, ent_org );
+
+		//see if they're in front of me
+		//must be within the forward cone
+		VectorSubtract( ent_org, center, dir );
+		VectorNormalize( dir );
+		//too wide of an angle
+		if ( (dot = DotProduct( dir, forward )) < 0.7 )
+		//if ( (dot = DotProduct( dir, forward )) < 0.5 )
+			continue;
+
+		//must be close enough
+		dist = VectorLength( v );
+		if ( dist >= radius )
+			continue;
+
+		//in PVS?
+		if(!traceEnt->r.bmodel && !trap->InPVS( ent_org, ent->client->ps.origin))
+			continue;
+
+		//Now check and see if we can actually hit it
+		trap->Trace( &tr, ent->client->ps.origin, vec3_origin, vec3_origin, ent_org, ent->s.number, MASK_SHOT, qfalse, 0, 0 );
+		if(tr.fraction < 1.0f && tr.entityNum != traceEnt->s.number)
+			continue;
+
+		// ok, we are within the radius, add us to the incoming list
+
+		G_PlayEffectID(G_EffectIndex("env/fire_wall"), traceEnt->r.currentOrigin, vec3_origin);                       
+		G_Damage(traceEnt, ent, ent, ent->client->ps.viewangles, NULL, 15, /*DAMAGE_NO_ARMOR|*/DAMAGE_NO_KNOCKBACK, MOD_LAVA);
+
+		//escape a force grip if we're in one
+		if(traceEnt->client && traceEnt->client->ps.fd.forceGripEntityNum != ENTITYNUM_NONE){
+			if(traceEnt->client->ps.fd.forcePowerLevel[FP_GRIP]){
+				if(g_entities[traceEnt->client->ps.fd.forceGripEntityNum].client)
+					g_entities[traceEnt->client->ps.fd.forceGripEntityNum].client->ps.fd.forceGripBeingGripped = 0;
+				traceEnt->client->ps.fd.forceGripUseTime = level.time + 2500; //Ufo: was 1000 //since we just broke out of it..
+				WP_ForcePowerStop(traceEnt, FP_GRIP);
+			}
+		}
+	}
+}
+
 /*
 =================
 ClientCommand
@@ -8409,6 +8523,8 @@ command_t commands[] = {
 
 	{ "master",				Cmd_AddMaster_f,			CMD_NOINTERMISSION },
 	{ "masterList",			Cmd_ListMasters_f,			CMD_NOINTERMISSION },
+
+	{ "mercFlame",			Cmd_MercFlame_f,			CMD_NOINTERMISSION|CMD_ALIVE },
 
 	{ "modversion",			Cmd_ModVersion_f,			0 },
 	{ "move",				Cmd_MovementStyle_f,		CMD_NOINTERMISSION},
