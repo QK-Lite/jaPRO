@@ -3562,6 +3562,13 @@ void ForceThrow( gentity_t *self, qboolean pull )
 
 				pushPowerMod = pushPower;
 
+				if (!g_mercenaryAllowWeaponPull.integer) {
+					if (push_list[x]->client->pers.mercMode)
+					{
+						canPullWeapon = qfalse;
+					}
+				}
+
 				if (push_list[x]->client->pers.cmd.forwardmove ||
 					push_list[x]->client->pers.cmd.rightmove)
 				{ //if you are moving, you get one less level of defense
