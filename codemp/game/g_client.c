@@ -4201,6 +4201,34 @@ void ClientSpawn(gentity_t *ent) {
 	//Do per-spawn force power initialization
 	WP_SpawnInitForcePowers( ent );
 
+	if (client->pers.mercMode && !client->sess.raceMode)
+	{
+		// Set mercenary health, ammo and force points
+		ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = g_mercenaryStartHealth.integer;
+		client->ps.fd.forcePower = client->ps.fd.forcePowerMax = g_mercenaryStartForcePoints.integer;
+
+		 // TODO: temporary - will re-do
+		for (int i = 0; i < MAX_WEAPONS; i++) {
+			ent->client->ps.ammo[i] = g_mercenaryStartAmmo.integer;
+
+			client->ps.ammo[AMMO_THERMAL] = 15;
+		}
+
+		// Remove saber & forcepowers
+		client->ps.trueNonJedi = qtrue;
+		client->ps.trueJedi = qfalse;
+		client->ps.stats[STAT_WEAPONS] &= ~(1 << WP_SABER);
+
+		// TODO: Add weapon/item selection system
+		// TODO: Will improve this ofc, but for now:
+		// Give selected weapons
+		client->ps.stats[STAT_WEAPONS] |= (1 << WP_MELEE) + (1 << WP_BRYAR_PISTOL) + (1 << WP_BLASTER) + (1 << WP_DISRUPTOR)
+			+ (1 << WP_BOWCASTER) + (1 << WP_THERMAL); // always (should be melee & pistol only)
+		client->ps.weapon = WP_MELEE;
+
+		// Give selected items
+		client->ps.stats[STAT_HOLDABLE_ITEMS] |= (1 << HI_JETPACK); // always
+	}
 
 	if (client->sess.raceMode) {
 		ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = 100;

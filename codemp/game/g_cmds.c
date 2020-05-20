@@ -4179,6 +4179,9 @@ void Cmd_EngageDuel_f(gentity_t *ent, int dueltype)//JAPRO - Serverside - Fullfo
 	if (ent->client->sess.raceMode)
 		return;
 
+	if (ent->client->pers.mercMode)
+		return;
+
 #if _GRAPPLE
 	if (ent->client && ent->client->hook)
 		Weapon_HookFree(ent->client->hook);
@@ -5604,7 +5607,7 @@ void Cmd_Aminfo_f(gentity_t *ent)
 	Q_strcat(buf, sizeof(buf), "   ^3To display server settings, type ^7serverConfig" );
 	trap->SendServerCommand(ent-g_entities, va("print \"%s\n\"", buf));
 
-	Q_strncpyz(buf, "   ^3Account commands: ", sizeof(buf));
+	Q_strncpyz(buf, "   ^3Account commands: ^7", sizeof(buf));
 	Q_strcat(buf, sizeof(buf), "register ");
 	Q_strcat(buf, sizeof(buf), "login ");
 	Q_strcat(buf, sizeof(buf), "logout ");
@@ -5615,7 +5618,7 @@ void Cmd_Aminfo_f(gentity_t *ent)
 	trap->SendServerCommand(ent-g_entities, va("print \"%s\n\"", buf));
 
 	if (g_allowRegistration.integer > 1) {
-		Q_strncpyz(buf, "   ^3Clan commands: ", sizeof(buf));
+		Q_strncpyz(buf, "   ^3Clan commands: ^7", sizeof(buf));
 		Q_strcat(buf, sizeof(buf), "clanList ");
 		Q_strcat(buf, sizeof(buf), "clanInfo ");
 		Q_strcat(buf, sizeof(buf), "clanJoin ");
@@ -5626,7 +5629,7 @@ void Cmd_Aminfo_f(gentity_t *ent)
 		trap->SendServerCommand(ent-g_entities, va("print \"%s\n\"", buf));
 	}
 
-	Q_strncpyz(buf, "   ^3Chat commands: ", sizeof(buf));
+	Q_strncpyz(buf, "   ^3Chat commands: ^7", sizeof(buf));
 	Q_strcat(buf, sizeof(buf), "ignore ");
 	Q_strcat(buf, sizeof(buf), "clanPass ");
 	Q_strcat(buf, sizeof(buf), "clanWhoIs ");
@@ -5635,7 +5638,7 @@ void Cmd_Aminfo_f(gentity_t *ent)
 	Q_strcat(buf, sizeof(buf), "say_team_mod");
 	trap->SendServerCommand(ent-g_entities, va("print \"%s\n\"", buf));
 
-	Q_strncpyz(buf, "   ^3Game commands: ", sizeof(buf));
+	Q_strncpyz(buf, "   ^3Game commands: ^7", sizeof(buf));
 	Q_strcat(buf, sizeof(buf), "amMOTD ");
 	Q_strcat(buf, sizeof(buf), "printStats ");
 	Q_strcat(buf, sizeof(buf), "showNet ");
@@ -5658,7 +5661,7 @@ void Cmd_Aminfo_f(gentity_t *ent)
 	trap->SendServerCommand(ent-g_entities, va("print \"%s\n\"", buf));
 
 	if (g_raceMode.integer) {
-		Q_strncpyz(buf, "   ^3Defrag commands: ", sizeof(buf));
+		Q_strncpyz(buf, "   ^3Defrag commands: ^7", sizeof(buf));
 		Q_strcat(buf, sizeof(buf), "rTop ");
 		Q_strcat(buf, sizeof(buf), "rLatest ");
 		Q_strcat(buf, sizeof(buf), "rRank ");
@@ -5686,7 +5689,21 @@ void Cmd_Aminfo_f(gentity_t *ent)
 		trap->SendServerCommand(ent-g_entities, va("print \"%s\n\"", buf));
 	}
 
-	Q_strncpyz(buf, "   ^3Emote commands: ", sizeof(buf));
+	if (g_allowMercenary.integer) {
+		Q_strncpyz(buf, "   ^3Mercenary commands: ^7", sizeof(buf));
+		Q_strcat(buf, sizeof(buf), "amMerc ");
+		if (ent->client->pers.mercMode)
+		{
+			Q_strcat(buf, sizeof(buf), "mercFlame ");
+			/*
+			Q_strcat(buf, sizeof(buf), "amWeapons ");
+			Q_strcat(buf, sizeof(buf), "amItems ");
+			*/
+		}
+		trap->SendServerCommand(ent-g_entities, va("print \"%s\n\"", buf));
+	}
+
+	Q_strncpyz(buf, "   ^3Emote commands: ^7", sizeof(buf));
 	if (!(g_emotesDisable.integer & (1 << E_BEG)))
 		Q_strcat(buf, sizeof(buf), "amBeg "); 
 	if (!(g_emotesDisable.integer & (1 << E_BEG2)))
@@ -5731,7 +5748,7 @@ void Cmd_Aminfo_f(gentity_t *ent)
 		Q_strcat(buf, sizeof(buf), "amRun"); 
 	trap->SendServerCommand(ent-g_entities, va("print \"%s\n\"", buf));
 
-	Q_strncpyz(buf, "   ^3Admin commands: ", sizeof(buf));
+	Q_strncpyz(buf, "   ^3Admin commands: ^7", sizeof(buf));
 	if (!(ent->client->sess.accountFlags)) //fixme.. idk
 		Q_strcat(buf, sizeof(buf), "you are not an administrator on this server.\n");
 	else {
@@ -8152,6 +8169,61 @@ void Cmd_ShowNet_f( gentity_t *ent ) { //why does this crash sometimes..? condit
 }
 //
 
+void Cmd_Ammerc_f(gentity_t *ent) {
+	if (!g_allowMercenary.integer) {
+		trap->SendServerCommand( ent-g_entities, "print \"^5This command is not allowed!\n\"" );
+		return;
+	}
+
+	if (!ent->client)
+		return;
+
+	if (ent->client && ent->client->ps.duelInProgress)
+		return;
+
+	if (ent->client->sess.raceMode) {
+		trap->SendServerCommand( ent-g_entities, "print \"^5This command is not allowed while in race mode!\n\"" );
+		return;
+	}
+
+	if (trap->Argc() != 1) {
+		trap->SendServerCommand( ent-g_entities, "print \"Usage: /amMerc\n\"" );
+		return;
+	}
+
+	 // We shouldn't allow it in this gametypes
+	if (g_gametype.integer == GT_DUEL || g_gametype.integer == GT_POWERDUEL || g_gametype.integer == GT_TEAM || g_gametype.integer == GT_CTF ||
+		g_gametype.integer == GT_CTY || g_gametype.integer == GT_SIEGE) {
+		trap->SendServerCommand( ent-g_entities, "print \"^5This command is not allowed in this gametype!\n\"" );
+		return;
+	}
+
+	 // If logged in
+	if (ent->client->pers.userName && ent->client->pers.userName[0]) {
+		trap->SendServerCommand(-1, va("print \"%s ^7(%s) is now a mercenary\n\"", ent->client->pers.netname, ent->client->pers.userName)); // Let everyone know
+	}
+	else
+	{
+		trap->SendServerCommand(ent - g_entities, "print \"You are not logged in!\n\"");
+		return;
+	}
+
+	if (ent->client->pers.mercMode)
+	{
+		ent->client->pers.mercMode = qfalse;
+		trap->SendServerCommand(ent-g_entities, "print \"^5You are not a mercenary anymore!\n\"");
+	}
+	else
+	{
+		ent->client->pers.mercMode = qtrue;
+		//trap->SendServerCommand(ent-g_entities, "print \"You may now proceed to choose your gear. Use ^3/amWeapons ^7or ^3/amItems ^7command!\n\"");
+	}
+
+	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
+		G_Kill( ent );
+	}
+}
+
 /*
 =================
 ClientCommand
@@ -8234,6 +8306,7 @@ command_t commands[] = {
 	{ "amlogout",			Cmd_Amlogout_f,				0 },
 	{ "amlookup",			Cmd_Amlookup_f,				0 },
 	{ "ammap",				Cmd_Ammap_f,				CMD_NOINTERMISSION },
+	{ "ammerc",				Cmd_Ammerc_f,				CMD_NOINTERMISSION },
 	{ "ammotd",				Cmd_Showmotd_f,				CMD_NOINTERMISSION },
 	{ "amnoisy",			Cmd_EmoteNoisy_f,			CMD_NOINTERMISSION|CMD_ALIVE },//EMOTE
 	{ "ampoint",			Cmd_EmotePoint_f,			CMD_NOINTERMISSION|CMD_ALIVE },//EMOTE
