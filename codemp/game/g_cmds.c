@@ -8174,9 +8174,9 @@ void Cmd_ShowNet_f( gentity_t *ent ) { //why does this crash sometimes..? condit
 }
 //
 
-void Cmd_Ammerc_f(gentity_t* ent) {
+void Cmd_Ammerc_f(gentity_t *ent) {
 	if (!g_allowMercenary.integer) {
-		trap->SendServerCommand(ent - g_entities, "print \"^5This command is not allowed!\n\"");
+		trap->SendServerCommand( ent-g_entities, "print \"^5This command is not allowed!\n\"" );
 		return;
 	}
 
@@ -8187,19 +8187,19 @@ void Cmd_Ammerc_f(gentity_t* ent) {
 		return;
 
 	if (ent->client->sess.raceMode) {
-		trap->SendServerCommand(ent - g_entities, "print \"^5This command is not allowed while in race mode!\n\"");
+		trap->SendServerCommand( ent-g_entities, "print \"^5This command is not allowed while in race mode!\n\"" );
 		return;
 	}
 
 	if (trap->Argc() != 1) {
-		trap->SendServerCommand(ent - g_entities, "print \"Usage: /amMerc\n\"");
+		trap->SendServerCommand( ent-g_entities, "print \"Usage: /amMerc\n\"" );
 		return;
 	}
 
-	// We shouldn't allow it in this gametypes
+	 // We shouldn't allow it in this gametypes
 	if (g_gametype.integer == GT_DUEL || g_gametype.integer == GT_POWERDUEL || g_gametype.integer == GT_TEAM || g_gametype.integer == GT_CTF ||
 		g_gametype.integer == GT_CTY || g_gametype.integer == GT_SIEGE) {
-		trap->SendServerCommand(ent - g_entities, "print \"^5This command is not allowed in this gametype!\n\"");
+		trap->SendServerCommand( ent-g_entities, "print \"^5This command is not allowed in this gametype!\n\"" );
 		return;
 	}
 
@@ -8208,35 +8208,34 @@ void Cmd_Ammerc_f(gentity_t* ent) {
 		if (!ent->client->pers.mercMode)
 			trap->SendServerCommand(-1, va("print \"%s ^7is now a mercenary\n\"", ent->client->pers.netname)); // Let everyone know
 	}
-	else if (g_allowMercenary.integer >= 2)
+	else if (g_allowMercenary.integer >= 2) 
 	{
 		// If logged in
 		if (ent->client->pers.userName && ent->client->pers.userName[0]) {
 			trap->SendServerCommand(-1, va("print \"%s ^7(%s) is now a mercenary\n\"", ent->client->pers.netname, ent->client->pers.userName)); // Let everyone know
-			if ((ent->client->pers.userName && ent->client->pers.userName[0]) && !(ent->client->pers.mercMode)) {
-				trap->SendServerCommand(-1, va("print \"%s ^7(%s) ^7is now a mercenary\n\"", ent->client->pers.netname, ent->client->pers.userName)); // Let everyone know
-			}
-			else
-			{
-				trap->SendServerCommand(ent - g_entities, "print \"You are not logged in!\n\"");
-				return;
-			}
-		}
-
-		if (ent->client->pers.mercMode)
-		{
-			ent->client->pers.mercMode = qfalse;
-			trap->SendServerCommand(ent - g_entities, "print \"^5You are not a mercenary anymore!\n\"");
+		if ((ent->client->pers.userName && ent->client->pers.userName[0]) && !(ent->client->pers.mercMode)) {
+			trap->SendServerCommand(-1, va("print \"%s ^7(%s) ^7is now a mercenary\n\"", ent->client->pers.netname, ent->client->pers.userName)); // Let everyone know
 		}
 		else
 		{
-			ent->client->pers.mercMode = qtrue;
-			//trap->SendServerCommand(ent-g_entities, "print \"You may now proceed to choose your gear. Use ^3/amWeapons ^7or ^3/amItems ^7command!\n\"");
+			trap->SendServerCommand(ent - g_entities, "print \"You are not logged in!\n\"");
+			return;
 		}
+	}
 
-		if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
-			G_Kill(ent);
-		}
+	if (ent->client->pers.mercMode)
+	{
+		ent->client->pers.mercMode = qfalse;
+		trap->SendServerCommand(ent-g_entities, "print \"^5You are not a mercenary anymore!\n\"");
+	}
+	else
+	{
+		ent->client->pers.mercMode = qtrue;
+		//trap->SendServerCommand(ent-g_entities, "print \"You may now proceed to choose your gear. Use ^3/amWeapons ^7or ^3/amItems ^7command!\n\"");
+	}
+
+	if (ent->client->sess.sessionTeam != TEAM_SPECTATOR) {
+		G_Kill( ent );
 	}
 }
 
