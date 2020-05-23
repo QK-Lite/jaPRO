@@ -858,6 +858,7 @@ typedef struct clientPersistant_s {
 	qboolean	centerMuzzle;//JAPRO - Serverside - Check if client wants to center muzzlepoint.
 	qboolean	noDamageNumbers;//Japro
 	qboolean	noDuelTele;
+	qboolean	amRefuseTele; //QK-Lite
 	qboolean	amfreeze;//JAPRO - Serverside - Admin - Amfreeze admin cmd
 	qboolean	mercMode; //QK-Lite - Mercernary mode
 #if 0

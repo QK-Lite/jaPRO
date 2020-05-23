@@ -5648,6 +5648,8 @@ void Cmd_Aminfo_f(gentity_t *ent)
 	}
 	if (g_allowSaberSwitch.integer) 
 		Q_strcat(buf, sizeof(buf), "saber ");
+	if (g_allowRefuseTele.integer)
+		Q_strcat(buf, sizeof(buf), "amRefuseTele ");
 	if (g_allowFlagThrow.integer && ((level.gametype == GT_CTF) || g_rabbit.integer)) 
 		Q_strcat(buf, sizeof(buf), "throwFlag ");
 	if (g_allowTargetLaser.integer) 
@@ -8400,6 +8402,31 @@ void Cmd_FakePing_f(gentity_t *ent) {
 	}
 }
 
+void Cmd_AmRefuseTele_f(gentity_t *ent) {
+	if (!g_allowRefuseTele.integer) {
+		trap->SendServerCommand(ent - g_entities, "print \"^5This command is not allowed!\n\"");
+		return;
+	}
+
+	if (trap->Argc() != 1) 
+	{ 
+		trap->SendServerCommand( ent-g_entities, "print \"Usage: /amRefuseTele\n\"" );
+		return; 
+	}
+
+	if (!ent->client->pers.amRefuseTele) {
+		trap->SendServerCommand(-1, va("print \"%s ^7cannot be teleported anymore!\n\"", ent->client->pers.netname));
+		trap->SendServerCommand(ent-g_entities, "print \"^5You cannot be teleported anymore!\n\"");
+		ent->client->pers.amRefuseTele = qtrue;
+	}
+	else
+	{
+		trap->SendServerCommand(ent-g_entities, "print \"^5You can be teleported now!\n\"");
+		ent->client->pers.amRefuseTele = qfalse;
+	}
+		
+}
+
 /*
 =================
 ClientCommand
@@ -8488,6 +8515,7 @@ command_t commands[] = {
 	{ "ampoint",			Cmd_EmotePoint_f,			CMD_NOINTERMISSION|CMD_ALIVE },//EMOTE
 	{ "ampsay",				Cmd_Ampsay_f,				CMD_NOINTERMISSION },
 	{ "amrage",				Cmd_EmoteRage_f,			CMD_NOINTERMISSION|CMD_ALIVE },//EMOTE
+	{ "amrefusetele",		Cmd_AmRefuseTele_f,			CMD_NOINTERMISSION },
 	{ "amrename",			Cmd_Amrename_f,				CMD_NOINTERMISSION },
 	{ "amrun",				Cmd_AmRun_f,				CMD_NOINTERMISSION},//EMOTE
 	{ "amsay",				Cmd_Amsay_f,				0 },

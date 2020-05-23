@@ -265,6 +265,8 @@ void AmTeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, qboolean
 		return;
 	if (BG_InRoll(&player->client->ps, player->s.legsAnim))//is this crashing? if ps is null or something?
 		return;
+	if (player->client->pers.amRefuseTele && !race)
+		return;
 
 #if _GRAPPLE
 	if (player->client && player->client->hook)
