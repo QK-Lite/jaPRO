@@ -8336,6 +8336,7 @@ void Cmd_MercFlame_f(gentity_t *ent){
 
 		G_PlayEffectID(G_EffectIndex("env/fire_wall"), traceEnt->r.currentOrigin, vec3_origin);                       
 		G_Damage(traceEnt, ent, ent, ent->client->ps.viewangles, NULL, 15, /*DAMAGE_NO_ARMOR|*/DAMAGE_NO_KNOCKBACK, MOD_LAVA);
+		G_Damage(traceEnt, ent, ent, ent->client->ps.viewangles, NULL, g_mercenaryFlameDamage.integer, /*DAMAGE_NO_ARMOR|*/DAMAGE_NO_KNOCKBACK, MOD_LAVA);
 
 		//escape a force grip if we're in one
 		if(traceEnt->client && traceEnt->client->ps.fd.forceGripEntityNum != ENTITYNUM_NONE){

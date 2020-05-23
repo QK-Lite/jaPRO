@@ -205,6 +205,7 @@ XCVAR_DEF( g_mercenaryStartHealth,		"150",			NULL,				CVAR_ARCHIVE,									qtru
 XCVAR_DEF( g_mercenaryStartAmmo,		"300",			NULL,				CVAR_ARCHIVE,									qfalse )
 XCVAR_DEF( g_mercenaryStartForcePoints, "75",			NULL,				CVAR_ARCHIVE,									qfalse )
 XCVAR_DEF( g_mercenaryAllowWeaponPull,	"0",			NULL,				CVAR_ARCHIVE,									qfalse )
+XCVAR_DEF( g_mercenaryFlameDamage,		"15",			NULL,				CVAR_ARCHIVE,									qtrue )
 
 //JAPRO MOVEMENT
 XCVAR_DEF( g_flipKick,					"0",			CVU_Flipkick,		CVAR_ARCHIVE,									qtrue )
