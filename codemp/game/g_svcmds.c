@@ -1432,7 +1432,8 @@ static bitInfo_T voteTweaks[] = {
 	{"Allow voting from spectate"},//8
 	{"Show votes in console"},//9
 	{"Only count voters in pass/fail calculation"},//10
-	{"Fix mapchange after gametype vote"}//11
+	{"Fix mapchange after gametype vote"},//11
+	{"Ignore map arenas (SP Maps)"}//12
 };
 static const int MAX_VOTE_TWEAKS = ARRAY_LEN( voteTweaks );
 
