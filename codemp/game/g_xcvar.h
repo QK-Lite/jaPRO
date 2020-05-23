@@ -266,6 +266,9 @@ XCVAR_DEF( g_stopHealthESP,				"0",			NULL,				CVAR_ARCHIVE,									qtrue )
 XCVAR_DEF( g_blockDuelHealthSpec,		"0",			NULL,				CVAR_ARCHIVE,									qtrue )
 XCVAR_DEF( g_KOTH,						"0",			NULL,				CVAR_ARCHIVE,									qtrue )
 XCVAR_DEF( g_scoreNPCs,					"2",			NULL,				CVAR_ARCHIVE,									qtrue )
+XCVAR_DEF( g_allowRefuseTele,			"0",			NULL,				CVAR_ARCHIVE,									qtrue )
+XCVAR_DEF( g_allowKnockMeDown,			"0",			NULL,				CVAR_ARCHIVE,									qtrue )
+XCVAR_DEF( g_amKnockMeDownJump,			"375",			NULL,				CVAR_ARCHIVE,									qtrue )
 
 #define _ANTIWALLHACK 1
 #if _ANTIWALLHACK
@@ -296,7 +299,6 @@ XCVAR_DEF( g_unpauseTime,				"5",			NULL,				CVAR_NONE,										qfalse )
 XCVAR_DEF( restricts,					"0",			NULL,				CVAR_ARCHIVE|CVAR_SERVERINFO,					qfalse )
 XCVAR_DEF( g_mercyRule,					"0",			NULL,				CVAR_ARCHIVE,									qtrue ) //If the difference is greater than X percent of the frag limit... then end match.
 XCVAR_DEF( g_autoQuit,					"0",			NULL,				CVAR_ARCHIVE,									qtrue )
-XCVAR_DEF( g_allowRefuseTele,			"0",			NULL,				CVAR_ARCHIVE,									qtrue )
 
 //JAPRO RACE / ACCOUNTS
 XCVAR_DEF( g_raceMode,					"0",			CVU_RaceMode,		CVAR_ARCHIVE,									qtrue )

@@ -5650,6 +5650,8 @@ void Cmd_Aminfo_f(gentity_t *ent)
 		Q_strcat(buf, sizeof(buf), "saber ");
 	if (g_allowRefuseTele.integer)
 		Q_strcat(buf, sizeof(buf), "amRefuseTele ");
+	if (g_allowKnockMeDown.integer)
+		Q_strcat(buf, sizeof(buf), "amKnockMeDown ");
 	if (g_allowFlagThrow.integer && ((level.gametype == GT_CTF) || g_rabbit.integer)) 
 		Q_strcat(buf, sizeof(buf), "throwFlag ");
 	if (g_allowTargetLaser.integer) 
@@ -8427,6 +8429,27 @@ void Cmd_AmRefuseTele_f(gentity_t *ent) {
 		
 }
 
+void Cmd_AmKnockmeDown_f(gentity_t *ent) {
+
+	if (!g_allowKnockMeDown.integer) {
+		trap->SendServerCommand(ent - g_entities, "print \"^5This command is not allowed!\n\"");
+		return;
+	}
+
+	if (ent->client->ps.forceHandExtend != HANDEXTEND_NONE)
+		return;
+
+	if (ent->client->sess.raceMode || ent->client->pers.amfreeze) {
+		return;
+	}
+
+	ent->client->ps.velocity[2] = g_amKnockMeDownJump.integer;
+	ent->client->ps.forceHandExtend = HANDEXTEND_KNOCKDOWN;
+	ent->client->ps.forceDodgeAnim = 0;
+	ent->client->ps.weaponTime = 1000;
+	ent->client->ps.forceHandExtendTime = level.time + 700;
+}
+
 /*
 =================
 ClientCommand
@@ -8503,6 +8526,7 @@ command_t commands[] = {
 	{ "aminfo",				Cmd_Aminfo_f,				0 },
 	{ "amkick",				Cmd_Amkick_f,				0 },
 	{ "amkillvote",			Cmd_Amkillvote_f,			0 },
+	{ "amknockmedown",		Cmd_AmKnockmeDown_f,		CMD_NOINTERMISSION|CMD_ALIVE },
 	{ "amlistmaps",			Cmd_AmMapList_f,			CMD_NOINTERMISSION },
 	{ "amlockteam",			Cmd_Amlockteam_f,			CMD_NOINTERMISSION },
 	{ "amlogin",			Cmd_Amlogin_f,				0 },
