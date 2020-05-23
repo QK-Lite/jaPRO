@@ -8205,12 +8205,16 @@ void Cmd_Ammerc_f(gentity_t *ent) {
 
 	if (g_allowMercenary.integer == 1) {
 		trap->SendServerCommand(-1, va("print \"%s is now a mercenary\n\"", ent->client->pers.netname)); // Let everyone know
+		if (!ent->client->pers.mercMode)
+			trap->SendServerCommand(-1, va("print \"%s ^7is now a mercenary\n\"", ent->client->pers.netname)); // Let everyone know
 	}
 	else if (g_allowMercenary.integer >= 2) 
 	{
 		// If logged in
 		if (ent->client->pers.userName && ent->client->pers.userName[0]) {
 			trap->SendServerCommand(-1, va("print \"%s ^7(%s) is now a mercenary\n\"", ent->client->pers.netname, ent->client->pers.userName)); // Let everyone know
+		if ((ent->client->pers.userName && ent->client->pers.userName[0]) && !(ent->client->pers.mercMode)) {
+			trap->SendServerCommand(-1, va("print \"%s ^7(%s) ^7is now a mercenary\n\"", ent->client->pers.netname, ent->client->pers.userName)); // Let everyone know
 		}
 		else
 		{
