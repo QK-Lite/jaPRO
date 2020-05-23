@@ -4201,17 +4201,21 @@ void ClientSpawn(gentity_t *ent) {
 	//Do per-spawn force power initialization
 	WP_SpawnInitForcePowers( ent );
 
+	// TODO: Make this code cleaner?
 	if (client->pers.mercMode && !client->sess.raceMode)
 	{
 		// Set mercenary health, ammo and force points
 		ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = g_mercenaryStartHealth.integer;
 		client->ps.fd.forcePower = client->ps.fd.forcePowerMax = g_mercenaryStartForcePoints.integer;
 
-		 // TODO: temporary - will re-do
 		for (int i = 0; i < MAX_WEAPONS; i++) {
 			ent->client->ps.ammo[i] = g_mercenaryStartAmmo.integer;
 
-			client->ps.ammo[AMMO_THERMAL] = 15;
+			// Set explosive weapons ammo
+			client->ps.ammo[AMMO_THERMAL] = g_mercenaryExplosivesAmmo.integer;
+			client->ps.ammo[AMMO_TRIPMINE] = g_mercenaryExplosivesAmmo.integer;
+			client->ps.ammo[AMMO_DETPACK] = g_mercenaryExplosivesAmmo.integer;
+			client->ps.ammo[AMMO_ROCKETS] = g_mercenaryExplosivesAmmo.integer;
 		}
 
 		// Remove saber & forcepowers
