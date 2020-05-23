@@ -51,7 +51,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		if ( cl->pers.connected == CON_CONNECTING ) {
 			ping = -1;
 		} else {
-			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
+			ping = cl->pers.fakePing ? cl->pers.fakePing + Q_irand(0, (int)(cl->pers.fakePing / 10)) : cl->ps.ping < 999 ? cl->ps.ping : 999;
 
 			if (g_fakeClients.integer && (g_entities[cl - level.clients].r.svFlags & SVF_BOT))
 				ping = Q_irand(25, 40);
@@ -5789,6 +5789,8 @@ void Cmd_Aminfo_f(gentity_t *ent)
 			Q_strcat(buf, sizeof(buf), "amVstr "); 
 		if (G_AdminAllowed(ent, JAPRO_ACCOUNTFLAG_A_RENAME, qfalse, qfalse, NULL))
 			Q_strcat(buf, sizeof(buf), "amRename "); 
+		if (G_AdminAllowed(ent, JAPRO_ACCOUNTFLAG_A_FAKEPING, qfalse, qfalse, NULL))
+			Q_strcat(buf, sizeof(buf), "fakePing "); 
 		trap->SendServerCommand(ent-g_entities, va("print \"%s\n\"", buf));
 		buf[0] = '\0';
 	}
@@ -8370,6 +8372,32 @@ void Cmd_MercCortosis_f(gentity_t *ent) {
 }
 #endif
 
+void Cmd_FakePing_f(gentity_t *ent) {
+	char arg[MAX_STRING_CHARS];
+
+	if (!G_AdminAllowed(ent, JAPRO_ACCOUNTFLAG_A_FAKEPING, qfalse, qfalse, "fakePing"))
+		return;
+
+	if (trap->Argc() != 2) 
+	{ 
+		trap->SendServerCommand( ent-g_entities, "print \"Usage: /fakePing <ping>.\n\"" );
+		return; 
+	}
+
+	trap->Argv(1, arg, sizeof(arg));
+	int newPing = atoi(arg);
+	if (trap->Argc() == 1 || newPing < 1 || newPing == ent->client->pers.fakePing)
+	{
+		ent->client->pers.fakePing = 0;
+		trap->SendServerCommand(ent-g_entities, "print \"^3Hideping: ^1OFF\n^3Specify a positive value as an argument.\n\"");
+	}
+	else
+	{
+		ent->client->pers.fakePing = newPing;
+		trap->SendServerCommand(ent-g_entities, va("print \"^3Hideping: ^2ON\n^3Your ping will from now appear to be roughly ^6%i^3.\n\"", newPing));
+	}
+}
+
 /*
 =================
 ClientCommand
@@ -8524,6 +8552,7 @@ command_t commands[] = {
 	{ "duelteam",			Cmd_DuelTeam_f,				CMD_NOINTERMISSION },
 	{ "engage_fullforceduel",	Cmd_ForceDuel_f,		CMD_NOINTERMISSION },//JAPRO - Serverside - Fullforce Duels
 	{ "engage_gunduel",		Cmd_GunDuel_f,				CMD_NOINTERMISSION },//JAPRO - Serverside - Fullforce Duels
+	{ "fakePing",			Cmd_FakePing_f,				0 },
 	{ "follow",				Cmd_Follow_f,				CMD_NOINTERMISSION },
 	{ "follownext",			Cmd_FollowNext_f,			CMD_NOINTERMISSION },
 	{ "followprev",			Cmd_FollowPrev_f,			CMD_NOINTERMISSION },

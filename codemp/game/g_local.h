@@ -414,7 +414,8 @@ extern int dueltypes[MAX_CLIENTS];//JAPRO - Serverside - Fullforce Duels y is th
 #define JAPRO_ACCOUNTFLAG_A_CALLVOTE	(1<<20)
 #define JAPRO_ACCOUNTFLAG_A_KILLVOTE	(1<<21)
 #define JAPRO_ACCOUNTFLAG_A_READAMSAY	(1<<22)
-#define JAPRO_MAX_ADMIN_BITS 22
+#define JAPRO_ACCOUNTFLAG_A_FAKEPING	(1<<23)
+#define JAPRO_MAX_ADMIN_BITS 23
 
 #define JAPRO_ACCOUNTFLAG_IPLOCK		(1<<23)
 #define JAPRO_ACCOUNTFLAG_TRUSTED		(1<<24)
@@ -917,6 +918,8 @@ typedef struct clientPersistant_s {
 	unsigned int	unlocks;
 
 	stats_t		stats;
+
+	int			fakePing;
 } clientPersistant_t;
 
 typedef struct renderInfo_s
